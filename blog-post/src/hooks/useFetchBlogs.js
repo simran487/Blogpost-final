@@ -4,8 +4,8 @@ import { BLOGS_PER_PAGE, BLOGS_API_URL } from "../config/constants"; // 💡 UPD
 import { useAuth } from "../context/AuthContext"; // 💡 NEW: Import useAuth
 
 // Now accepts the current page number and the refresh trigger
-export const useFetchBlogs = (currentPage, refreshTrigger) => { // Removed 'url' prop
-  const { token } = useAuth(); // 💡 NEW: Get the token from the AuthContext
+export const useFetchBlogs = (currentPage, refreshTrigger, postView) => { // Removed 'url' prop
+  const { token, userId } = useAuth(); // 💡 NEW: Get the token from the AuthContext
   const [data, setData] = useState({ 
     blogs: [], 
     totalCount: 0, 
@@ -15,26 +15,35 @@ export const useFetchBlogs = (currentPage, refreshTrigger) => { // Removed 'url'
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Construct the API URL with pagination query parameters
-    const apiUrlWithPagination = `${BLOGS_API_URL}?page=${currentPage}&limit=${BLOGS_PER_PAGE}`;
-    
-    const fetchBlogs = async () => {
+     const fetchBlogs = async () => {
       setLoading(true);
       setError(null);
-      
       try {
+    // Construct the API URL with pagination query parameters
+    let apiUrl;
+      
+       // 💡 NEW: Conditionally adjust API URL for "My Posts"
+        if (postView === "my" && userId) {
+          apiUrl = `${BLOGS_API_URL}/user/${userId}?page=${currentPage}&limit=${BLOGS_PER_PAGE}`;
+        }else{
+          apiUrl = `${BLOGS_API_URL}?page=${currentPage}&limit=${BLOGS_PER_PAGE}`;
+        }
         const headers = {};
         // 💡 NEW: Attach Authorization header if token exists
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(apiUrlWithPagination, { headers });
+        const response = await fetch(apiUrl, { headers });
         
         if (!response.ok) {
-          const errorDetail = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-          throw new Error(`API error: ${errorDetail.error || response.statusText}`);
+          const errorDetail = await response.json().catch(() => ({ 
+            error: `HTTP ${response.status}` 
+          }));
+          throw new Error(
+            `API error: ${errorDetail.error || response.statusText}`);
         }
+       
 
         const json = await response.json();
         
@@ -59,7 +68,7 @@ export const useFetchBlogs = (currentPage, refreshTrigger) => { // Removed 'url'
         setData({
             blogs: mappedBlogs,
             totalCount: json.pagination?.totalCount || 0,
-            totalPages: json.pagination?.totalPages || 1
+            totalPages: json.pagination?.totalPages || 1,
         });
 
       } catch (e) {
@@ -71,7 +80,7 @@ export const useFetchBlogs = (currentPage, refreshTrigger) => { // Removed 'url'
     };
 
     fetchBlogs();
-  }, [currentPage, refreshTrigger, token]); // 💡 ADDED 'token' as a dependency
+  }, [currentPage, refreshTrigger, token, postView, userId]); // 💡 ADDED 'token' as a dependency
 
   return { data, loading, error, setData };
 };

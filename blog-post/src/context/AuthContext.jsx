@@ -120,6 +120,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
+        userId: user ?.id, // 💡 NEW: Provide userId directly
         token,
         isAuthenticated,
         authLoading,

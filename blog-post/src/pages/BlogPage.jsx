@@ -14,6 +14,7 @@ const BlogPage = () => {
   const { isAuthenticated, token } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState("grid");
+  const [postView, setPostView] = useState("all"); // "all" or "my"
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
@@ -22,13 +23,21 @@ const BlogPage = () => {
     data: { blogs, totalCount, totalPages = 1 },
     loading,
     error,
-  } = useFetchBlogs(currentPage, refreshTrigger);
+  } = useFetchBlogs(currentPage, refreshTrigger, postView);
 
   // Handle pagination
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  // Handle post view toggle
+  const handlePostViewChange = (view) => {
+    if (view !== postView) {
+      setPostView(view);
+      setCurrentPage(1); // Reset to first page
+    }
+  };
 
   // Refresh after success
   const handleSuccess = useCallback(() => {
@@ -103,6 +112,35 @@ const BlogPage = () => {
             <span>Create New Post</span>
           </button>
 
+
+           {/* NEW: Toggle for All/My Posts */}
+            {isAuthenticated && (
+              <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => handlePostViewChange("all")}
+                  className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+                    postView === "all"
+                      ? "bg-indigo-600 text-white shadow"
+                      : "text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  All Posts
+                </button>
+                <button
+                  onClick={() => handlePostViewChange("my")}
+                  className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+                    postView === "my"
+                      ? "bg-indigo-600 text-white shadow"
+                      : "text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  My Posts
+                </button>
+              </div>
+            )}
+          </div>
+
+
           <button
             onClick={() =>
               setViewMode(viewMode === "grid" ? "list" : "grid")
@@ -121,7 +159,7 @@ const BlogPage = () => {
               </>
             )}
           </button>
-        </div>
+        
 
         {/* Blog Cards */}
         {loading ? (
@@ -153,13 +191,13 @@ const BlogPage = () => {
         )}
 
         {/* Always show pagination controls */}
-        {blogs.length > 0 && (
+        
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={handlePageChange}
           />
-        )}
+        
       </main>
 
       <Footer />

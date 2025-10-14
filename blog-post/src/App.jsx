@@ -6,6 +6,7 @@ import SingleBlogPage from "./pages/SingleBlogPage";
 import SignIn from "./pages/auth/SignIn";  // Assuming you moved these to a pages/auth directory
 import SignUp from "./pages/auth/SignUp";  // Assuming you moved these to a pages/auth directory
 
+
 const App = () => (
     <Routes>
         <Route path="/" element={<BlogPage />} />
