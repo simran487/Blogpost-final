@@ -24,7 +24,7 @@ const SingleBlogPage = () => {
         description: apiBlog.description || "No description available.",
         content: apiBlog.content, 
         imageUrl:
-            apiBlog.image_url ||
+             (apiBlog.image_url ? `http://localhost:5000${apiBlog.image_url}` : null) ||
             `https://placehold.co/400x250/3730a3/ffffff?text=${apiBlog.title || "Blog Post"}`,
         category: "User Generated",
         date: apiBlog.created_at

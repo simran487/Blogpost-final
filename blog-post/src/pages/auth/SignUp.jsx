@@ -8,7 +8,8 @@ const SignUp = () => {
   const navigate = useNavigate();
   // 💡 Retrieve isAuthenticated state
   const { signUp, authLoading, isAuthenticated } = useAuth();
-  const [error, setError] = useState(null);
+  
+  
 
   const [formData, setFormData] = useState({
     name: '',
@@ -16,6 +17,9 @@ const SignUp = () => {
     password: '',
     // confirmPassword: '',
   });
+
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // 💡 NEW: Redirect if already logged in
   useEffect(() => {
@@ -43,17 +47,23 @@ const SignUp = () => {
         email: formData.email,
         password: formData.password
     };
-
+    
+   try{
     const result = await signUp(registrationData);
-    console.log('Sign Up Result:', result); // Debugging line
-    if (result.success) {
-      // Redirection is also handled by the useEffect above
-      navigate('/'); 
-    } else {
-      setError(result.error);
+   // console.log('Sign Up Result:', result); // Debugging line
+    // Check for both success and the user object in the result
+    if (result.success && result.user) {
+       navigate('/verify-otp', { state: { userId: result.user.id, email: result.user.email } });
+     } 
+    }catch (error) {
+        if (error.message && error.message.includes('This email is already registered')) {
+        setError('This email is already registered. Please use a different email or sign in.');
+      } else {
+        setError(error.message || 'An unexpected error occurred. Please try again.');
+      }
     }
   };
-
+ 
   const handleClose = () => {
     navigate('/'); // Navigate back to the read-only home page
   }
@@ -67,12 +77,22 @@ const SignUp = () => {
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition z-10"
-          aria-label="Close"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition"
+          // aria-label="Close"
         >
           <X className="w-6 h-6" />
         </button>
-
+        {successMessage ? (
+          <div className="p-8 text-center">
+            <h2 className="text-2xl font-bold text-green-600 mb-4">Success!</h2>
+            <p className="text-gray-700">{successMessage}</p>
+            <div className="mt-6">
+              <Link to="/signin" className="font-medium text-indigo-600 hover:text-indigo-500 transition">
+                Proceed to Sign In
+              </Link>
+            </div>
+          </div>
+        ) : (
         <div className="p-8 pb-4">
           <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-6">
             Create a New Account
@@ -156,7 +176,7 @@ const SignUp = () => {
             </div>
           </form>
         </div>
-
+        )}
         {/* Footer Link */}
         <div className="p-8 pt-0 text-center border-t border-gray-200">
           <p className="text-sm text-gray-600">
@@ -169,6 +189,5 @@ const SignUp = () => {
       </div>
     </div>
   );
-};
-
+}
 export default SignUp;

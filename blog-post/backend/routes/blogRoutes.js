@@ -29,11 +29,25 @@ router.get('/', authenticateToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6;
+    // This route should only fetch all blogs, passing the authenticated user's ID for ownership checks.
     const result = await BlogView.getAllBlogs(page, limit, req.userId);
     res.json(result);
   } catch (error) {
     console.error('Error fetching blogs:', error);
     res.status(500).json({ error: 'Failed to fetch blogs' });
+  }
+});
+
+// Get user's own blogs
+router.get('/my-posts', authenticateToken, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const result = await BlogView.getUserBlogs(req.userId, page, limit);
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching user's blogs:", error);
+    res.status(500).json({ error: "Failed to fetch user's blogs" });
   }
 });
 
@@ -117,19 +131,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: error.message });
     }
     res.status(500).json({ error: error.message || 'Failed to delete blog' });
-  }
-});
-
-// Get user blogs
-router.get('/user/:userId', authenticateToken, async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
-    const result = await BlogView.getUserBlogs(req.params.userId, page, limit);
-    res.json(result);
-  } catch (error) {
-    console.error('Error fetching user blogs:', error);
-    res.status(500).json({ error: 'Failed to fetch user blogs' });
   }
 });
 

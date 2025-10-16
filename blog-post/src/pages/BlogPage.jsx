@@ -138,7 +138,6 @@ const BlogPage = () => {
                 </button>
               </div>
             )}
-          </div>
 
 
           <button
@@ -159,7 +158,7 @@ const BlogPage = () => {
               </>
             )}
           </button>
-        
+        </div>
 
         {/* Blog Cards */}
         {loading ? (

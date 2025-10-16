@@ -13,3 +13,9 @@ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 -- Password is 'password'
 INSERT INTO users (name, email, password_hash) VALUES 
 ('Blog Admin', 'admin@blog.com', '$2b$10$wE9w2n2z9B0P0wX0P2X7.u4T6I5J4K3L2M1N0O1P2Q3R4S5T6U7V8W9X0Y1Z2A3B4C5D6E');
+
+
+ALTER TABLE users
+ADD COLUMN is_verified BOOLEAN DEFAULT FALSE,
+ADD COLUMN otp VARCHAR(10),
+ADD COLUMN otp_expires_at TIMESTAMP;

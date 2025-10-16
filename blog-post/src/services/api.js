@@ -1,5 +1,7 @@
+import { BLOGS_PER_PAGE } from "../config/constants";
+
 // services/api.js - Centralized API service layer
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Helper function for handling API responses
 const handleResponse = async (response) => {
@@ -12,7 +14,7 @@ const handleResponse = async (response) => {
 
 // Authentication API services
 export const AuthService = {
-  // Register a new user
+  // Register a new user (sends OTP)
   register: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/signUp`, {
       method: 'POST',
@@ -22,12 +24,32 @@ export const AuthService = {
     return handleResponse(response);
   },
 
+  // Verify user's OTP
+  verifyOtp: async (userId, otp) => {
+    const response = await fetch(`${API_BASE_URL}/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, otp })
+    });
+    return handleResponse(response);
+  },
+
+  // Resend OTP
+  resendOtp: async (email) => {
+    const response = await fetch(`${API_BASE_URL}/resend-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    return handleResponse(response);
+  },
+
   // Login user
-  login: async (credentials) => {
+  login: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/signIn`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
+      body: JSON.stringify(userData)
     });
     return handleResponse(response);
   }
@@ -36,7 +58,7 @@ export const AuthService = {
 // Blog API services
 export const BlogService = {
   // Get all blogs with pagination
-  getAllBlogs: async (page = 1, limit = 6) => {
+  getAllBlogs: async (page = 1, limit = BLOGS_PER_PAGE) => {
     const token = localStorage.getItem('token');
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
     
@@ -110,11 +132,14 @@ export const BlogService = {
   },
 
   // Get user blogs
-  getUserBlogs: async (userId, page = 1, limit = 6) => {
+  getUserBlogs: async (userId, page = 1, limit = BLOGS_PER_PAGE) => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication required');
     
-    const response = await fetch(`${API_BASE_URL}/blogs/user/${userId}?page=${page}&limit=${limit}`, {
+    // The userId parameter is not used in the URL.
+    // The backend's /my-posts route securely identifies the user from the token.
+    // This is the correct and secure endpoint for fetching the logged-in user's posts.
+    const response = await fetch(`${API_BASE_URL}/blogs/my-posts?page=${page}&limit=${limit}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return handleResponse(response);

@@ -9,23 +9,30 @@ import fs from 'fs';
 import authRoutes from './routes/authRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 
+
 // Import database connection
 import pool from './models/db.js';
 
-const app = express();
-const PORT = process.env.SERVER_PORT || 3001;
 
-// Middleware
+const app = express();
+const PORT = process.env.SERVER_PORT || 5000;
+
+
+// --- MIDDLEWARE SETUP ---
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // Middleware to parse JSON bodies
 app.use('/uploads', express.static('uploads'));
 
+
+// const PORT = process.env.SERVER_PORT || 5000;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 // Request logging middleware
-app.use((req, res, next) => {
-  console.log('Incoming request to:', req.path);
-  console.log('Content-Type:', req.headers['content-type']);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Incoming request to:', req.path);
+//   console.log('Content-Type:', req.headers['content-type']);
+//   next();
+// });
 
 // Routes
 app.use('/api', authRoutes);

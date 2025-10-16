@@ -1,7 +1,8 @@
 // src/hooks/useFetchBlogs.js
 import { useState, useEffect } from "react";
-import { BLOGS_PER_PAGE, BLOGS_API_URL } from "../config/constants"; // 💡 UPDATED import
+import { BLOGS_PER_PAGE } from "../config/constants";
 import { useAuth } from "../context/AuthContext"; // 💡 NEW: Import useAuth
+import { BlogService } from "../services/api"; // 💡 NEW: Import BlogService
 
 // Now accepts the current page number and the refresh trigger
 export const useFetchBlogs = (currentPage, refreshTrigger, postView) => { // Removed 'url' prop
@@ -19,33 +20,17 @@ export const useFetchBlogs = (currentPage, refreshTrigger, postView) => { // Rem
       setLoading(true);
       setError(null);
       try {
-    // Construct the API URL with pagination query parameters
-    let apiUrl;
-      
-       // 💡 NEW: Conditionally adjust API URL for "My Posts"
+        let response;
         if (postView === "my" && userId) {
-          apiUrl = `${BLOGS_API_URL}/user/${userId}?page=${currentPage}&limit=${BLOGS_PER_PAGE}`;
-        }else{
-          apiUrl = `${BLOGS_API_URL}?page=${currentPage}&limit=${BLOGS_PER_PAGE}`;
-        }
-        const headers = {};
-        // 💡 NEW: Attach Authorization header if token exists
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+          // Fetch only the posts for the logged-in user
+          response = await BlogService.getUserBlogs(userId, currentPage, BLOGS_PER_PAGE);
+        } else {
+          // Fetch all posts
+          response = await BlogService.getAllBlogs(currentPage, BLOGS_PER_PAGE);
         }
 
-        const response = await fetch(apiUrl, { headers });
-        
-        if (!response.ok) {
-          const errorDetail = await response.json().catch(() => ({ 
-            error: `HTTP ${response.status}` 
-          }));
-          throw new Error(
-            `API error: ${errorDetail.error || response.statusText}`);
-        }
-       
-
-        const json = await response.json();
+        // The response from BlogService is already parsed JSON
+        const json = response;
         
         // --- NEW DATA STRUCTURE MAPPING ---
         const mappedBlogs = json.blogs.map((blog) => ({

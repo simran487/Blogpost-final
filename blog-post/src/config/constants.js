@@ -9,3 +9,4 @@ export const AUTH_API_URL = `${API_BASE_URL}/auth`;
 
 // 💡 NEW: Explicit Blog URL
 export const BLOGS_API_URL = `${API_BASE_URL}/blogs`;
+

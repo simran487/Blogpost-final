@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react'; // 💡 Import useEffect
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { X } from 'lucide-react'; // Import Close icon
+import { AuthService } from '../../services/api';
 
 const SignIn = () => {
   const navigate = useNavigate();
   // 💡 Retrieve isAuthenticated state
   const { signIn, authLoading, isAuthenticated } = useAuth(); 
   const [error, setError] = useState(null);
+  const [resendMessage, setResendMessage] = useState('');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -30,19 +32,41 @@ const SignIn = () => {
     e.preventDefault();
     setError(null);
 
+    try{
     const result = await signIn(formData);
 
     if (result.success) {
       // Redirection is also handled by the useEffect above, but keep for immediate feedback
       navigate('/'); 
-    } else {
-      setError(result.error);
+    } 
+  }catch (error) {
+      setError(error.message || 'An unexpected error occurred. Please try again.');
+      setResendMessage(''); // Clear any previous resend messages
+      
     }
   };
 
   const handleClose = () => {
     navigate('/'); // Navigate back to the read-only home page
   }
+
+  // const handleResendVerification = async () => {
+  //   if (!formData.email) {
+  //     setError('Please enter your email address to resend the verification link.');
+  //     return;
+  //   }
+  //   try {
+  //     const result = await AuthService.resendVerification(formData.email);
+  //     if (result.success) {
+  //       setResendMessage('A new verification link has been sent to your email.');
+  //       setError(null);
+  //     } else {
+  //       setError(result.error || 'Failed to resend verification email.');
+  //     }
+  //   } catch (err) {
+  //     setError('An error occurred while resending the verification email.');
+  //   }
+  // };
 
   // 💡 Render nothing while redirecting
   if (isAuthenticated) return null;
