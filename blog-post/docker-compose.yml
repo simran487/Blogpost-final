@@ -1,0 +1,45 @@
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: simran1234
+      POSTGRES_DB: blog_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - blog_network
+
+  express_server:
+    build: ./backend
+    container_name: express_server
+    env_file: ./backend/.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres_db
+    networks:
+      - blog_network
+
+  react_client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_BASE_URL: http://express_server:5000
+        VITE_SERVER_BASE_URL: http://express_server:5000
+    container_name: react_client
+    ports:
+      - "3000:80"
+    networks:
+      - blog_network
+
+volumes:
+  postgres_data:
+
+networks:
+  blog_network:
+    driver: bridge

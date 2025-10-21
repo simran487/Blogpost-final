@@ -8,7 +8,7 @@ import { AuthProvider } from './context/AuthContext'; // 💡 NEW: Import AuthPr
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename="/Blogpost-final/blog-post/frontend/">
+    <BrowserRouter>
       {/* 💡 NEW: Wrap the application with AuthProvider */}
       <AuthProvider> 
         <App />

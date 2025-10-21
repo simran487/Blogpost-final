@@ -32,15 +32,20 @@ export const AuthView = {
       const newUser = await UserModel.create(name, email, password);
       
       // Send OTP email
-      await sendOtpEmail(newUser.email, newUser.otp);
+      const verifiedUser =await UserModel.verifyOtp(newUser.email, newUser.otp);
+
+      // Generate auth token for the new user
+      const authToken = AuthView.generateAuthToken(verifiedUser);
       
     // Return success message
       return {
         success: true,
+        token: authToken,
         message: 'Registration successful! Please check your email for the OTP to verify your account.',
         user: {
-          id: newUser.id,
-          email: newUser.email
+          id: verifiedUser.id,
+          name: verifiedUser.name,
+          email: verifiedUser.email
         }
       };
     } catch (err) {
@@ -118,9 +123,9 @@ export const AuthView = {
     }
 
     // Check if user is verified
-    if (!user.is_verified) {
-      throw new Error('Please verify your email before logging in.');
-    }
+    // if (!user.is_verified) {
+    //   throw new Error('Please verify your email before logging in.');
+    // }
 
     // Verify password
     const isMatch = await UserModel.verifyPassword(password, user.password_hash);
@@ -130,6 +135,7 @@ export const AuthView = {
     
     
     // Generate token
+    console.log('User object before token generation:', user);
     const token = AuthView.generateAuthToken(user);
     
     // Return user data and token

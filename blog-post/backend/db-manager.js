@@ -52,8 +52,30 @@ export const ensureDatabaseInitialized = async () => {
         await appDbClient.end();
       }
       // --- END CHANGE ---
-    } else {
-      console.log(`Database '${dbName}' already exists. Skipping initialization.`);
+     } else {
+      console.log(`Database '${dbName}' already exists. Checking for tables...`);
+      const appDbClient = new pg.Client({ ...dbConfig, database: dbName });
+      try {
+        await appDbClient.connect();
+        const checkTablesQuery = `SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users'`;
+        const { rows: tableRows } = await appDbClient.query(checkTablesQuery);
+
+        if (tableRows.length === 0) {
+          console.log('Tables not found. Initializing tables...');
+          const initDbSqlPath = path.resolve(__dirname, 'init_db.sql');
+          if (fs.existsSync(initDbSqlPath)) {
+            const initDbSql = fs.readFileSync(initDbSqlPath, 'utf8');
+            await appDbClient.query(initDbSql);
+            console.log('Tables initialized successfully from init_db.sql.');
+          } else {
+            throw new Error('CRITICAL: init_db.sql not found. Cannot initialize tables.');
+          }
+        } else {
+          console.log('Tables already exist. Skipping table initialization.');
+        }
+      } finally {
+        await appDbClient.end();
+      }
     }
   } catch (error) {
     console.error('Error checking or creating database:', error);
