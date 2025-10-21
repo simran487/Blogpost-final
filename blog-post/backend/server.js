@@ -10,7 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 
 
-// Import database connection
+// Import database utility
+import { ensureDatabaseInitialized } from './db-manager.js';
 import pool from './models/db.js';
 
 
@@ -52,6 +53,9 @@ app.get('/api/users', async (req, res) => {
 // Start server
 const startServer = async () => {
   try {
+    // Ensure the database is created and initialized
+    await ensureDatabaseInitialized();
+
     // Test database connection
     const client = await pool.connect();
     console.log('Database connection successful');
