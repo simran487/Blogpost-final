@@ -33,7 +33,7 @@ services:
         VITE_SERVER_BASE_URL: http://express_server:5000
     container_name: react_client
     ports:
-      - "3000:80"
+      - "3000:3000"
     networks:
       - blog_network
 
