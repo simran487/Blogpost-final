@@ -20,7 +20,7 @@ const PORT = process.env.SERVER_PORT || 5000;
 
 
 // --- MIDDLEWARE SETUP ---
-app.use(cors());
+app.use(corsMiddleware());
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use('/uploads', express.static('uploads'));
 

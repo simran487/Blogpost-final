@@ -5,6 +5,7 @@ import cors from 'cors';
 const allowedOrigins = [
   'http://localhost:3000', // Default React dev server port
   'http://localhost:3001', // Another common dev port
+  'http://frontend.blogpost.run.place'
   // Add your deployed frontend URL here when you go to production
 ];
 
